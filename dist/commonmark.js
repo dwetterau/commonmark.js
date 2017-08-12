@@ -39,13 +39,15 @@ var reHtmlBlockClose = [
 
 var reThematicBreak = /^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$/;
 
-var reMaybeSpecial = /^[#`~*+_=<>0-9-]/;
+var reMaybeSpecial = /^[#`~*+_=<>0-9-\[]/;
 
 var reNonSpace = /[^ \t\f\v\r\n]/;
 
 var reBulletListMarker = /^[*+-]/;
 
 var reOrderedListMarker = /^(\d{1,9})([.)])/;
+
+var reCheckListMarker = /^\[([x ])]/;
 
 var reATXHeadingMarker = /^#{1,6}(?:[ \t]+|$)/;
 
@@ -137,7 +139,8 @@ var parseListMarker = function(parser, container) {
                  start: null,
                  delimiter: null,
                  padding: null,
-                 markerOffset: parser.indent };
+                 markerOffset: parser.indent,
+                 checked: null};
     if ((match = rest.match(reBulletListMarker))) {
         data.type = 'bullet';
         data.bulletChar = match[0][0];
@@ -148,6 +151,9 @@ var parseListMarker = function(parser, container) {
         data.type = 'ordered';
         data.start = parseInt(match[1]);
         data.delimiter = match[2];
+    } else if ((match = rest.match(reCheckListMarker))) {
+        data.type = 'checklist';
+        data.checked = match[1][0] == "x";
     } else {
         return null;
     }
@@ -2183,6 +2189,10 @@ Object.defineProperty(proto, 'listDelimiter', {
     set: function(delim) { this._listData.delimiter = delim; }
 });
 
+Object.defineProperty(proto, 'listChecked', {
+    get: function() { return this._listData.checked; },
+    set: function(checked) { this._listData.checked = checked; }
+});
 Object.defineProperty(proto, 'onEnter', {
     get: function() { return this._onEnter; },
     set: function(s) { this._onEnter = s; }
