@@ -242,4 +242,28 @@ cursor.write('\n');
 cursor.write(results.passed.toString() + ' tests passed, ' +
              results.failed.toString() + ' failed.\n');
 
+cursor.write("David's hacky checkbox tests\n");
+var ast = reader.parse(
+    "# Hello world\n" +
+    "\n" +
+    "[ ] asdf\n" +
+    "[ ] gef\n" +
+    "[x] jkl\n" +
+    "\n" +
+    "the end"
+);
+var walker = ast.walker()
+  , event;
+while((event = walker.next())) {
+  if (!event.entering) continue;
+  cursor.write(
+    new Array(event.node.level).join(" ") +
+    " type: " + event.node.type +
+    " title: " + event.node.title+
+    " literal: " + event.node.literal+
+    " checked: " + event.node.listChecked+
+    " info: " + event.node.info +"\n");
+}
+
+
 process.exit(results.failed);
